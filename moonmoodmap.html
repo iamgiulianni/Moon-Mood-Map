@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moon Phase Survey</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 0;
+      background-color: #f0f8ff;
+      color: #333;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    .survey-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .question {
+      margin-bottom: 15px;
+    }
+
+    .question label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    .question input[type="radio"] {
+      margin-right: 5px;
+    }
+
+    #result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      display: none;
+    }
+
+    .signal-category {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #fdfdfd;
+    }
+
+    .signal-category strong {
+      color: #555;
+    }
+
+    .error {
+      border: 2px solid red;
+      border-radius: 5px;
+      padding: 10px;
+      background: #ffe6e6;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        margin: 10px;
+      }
+
+      .survey-container {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Moon Phase Needs Survey</h1>
+  <div class="survey-container">
+    <form id="survey-form">
+      <div class="question">
+        <label>Space</label>
+        <input type="radio" name="space" value="1"> Very low
+        <input type="radio" name="space" value="2"> Low
+        <input type="radio" name="space" value="3"> Moderate
+        <input type="radio" name="space" value="4"> High
+        <input type="radio" name="space" value="5"> Very high
+      </div>
+      <!-- Repeat similar blocks for other questions -->
+
+      <button type="button" onclick="calculateMoonPhase()">Submit</button>
+    </form>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    function calculateMoonPhase() {
+      const questions = ['space', 'touch', 'rest', 'food', 'breathing', 'tasks', 'understanding'];
+      let total = 0;
+      let answered = 0;
+
+      // Clear previous error highlights
+      document.querySelectorAll('.question').forEach(question => {
+        question.classList.remove('error');
+      });
+
+      questions.forEach(q => {
+        const questionBlock = document.querySelector(`input[name="${q}"]`).parentElement;
+        const selected = document.querySelector(`input[name="${q}"]:checked`);
+        if (selected) {
+          total += parseInt(selected.value);
+          answered++;
+        } else {
+          // Highlight unanswered questions
+          questionBlock.classList.add('error');
+        }
+      });
+
+      if (answered < questions.length) {
+        alert("Please answer all questions.");
+        return;
+      }
+
+      const average = total / questions.length;
+      const result = document.getElementById('result');
+      result.style.display = 'block';
+
+      const phases = [
+        {
+          threshold: 3.5,
+          title: '🌑 New Moon Phase',
+          description: 'Highest level of needs - time to receive and restore',
+          signals: [
+            { category: 'Space', send: 'Need complete alone space', reply: "I'll help protect your boundaries" },
+            { category: 'Touch', send: 'No touch capacity today', reply: "I'll maintain physical distance" }
+          ]
+        },
+        {
+          threshold: 2.75,
+          title: '🌒 Waning Crescent',
+          description: 'More need to receive, some energy to give',
+          signals: [
+            { category: 'Space', send: 'Need mostly alone time', reply: 'Can check in from doorway' }
+          ]
+        }
+      ];
+
+      let phase = phases.find(p => average >= p.threshold) || phases[phases.length - 1];
+
+      result.innerHTML = `
+        <h2>${phase.title}</h2>
+        <p>${phase.description}</p>
+        ${phase.signals.map(signal => `
+          <div class="signal-category">
+            <strong>${signal.category}:</strong><br>
+            Send: "${signal.send}"<br>
+            Reply: "${signal.reply}"
+          </div>`).join('')}
+      `;
+    }
+  </script>
+</body>
+</html>
